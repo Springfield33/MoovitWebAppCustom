@@ -1,4 +1,4 @@
-# Bus 490/495 — Tiburtina e Calabria su iPhone (Scriptable + GitHub)
+﻿# Bus 490/495 — Tiburtina e Calabria su iPhone (Scriptable + GitHub)
 
 Data: 2026-10-08 · Stato: design approvato in chat, in revisione scritta
 
@@ -68,14 +68,15 @@ Configurazione fermate (id, direzione, fascia griglia) in un oggetto in testa al
   "generated": "2026-10-08T02:00:00Z",
   "range": ["20261005", "20261111"],
   "stops": {
-    "tiburtina": { "id": "82007", "name": "STAZ.NE TIBURTINA (MB)", "grid": [420, 540],
+    "tiburtina": { "ids": ["82007"], "name": "STAZ.NE TIBURTINA (MB)", "dir": 0, "grid": [420, 540],
                    "d": { "20261008": 0 }, "p": [[[405, 490], [412, 495]]] },
-    "calabria":  { "id": "71406", "name": "CALABRIA", "grid": [960, 1080],
+    "calabria":  { "ids": ["71406"], "name": "CALABRIA", "dir": 1, "grid": [960, 1080],
                    "d": { "20261008": 0 }, "p": [[[963, 490]]] }
   }
 }
 ```
 
+- `ids`: stop_id della fermata (array: a Tiburtina potrebbero esserci più pali di partenza); `dir`: direction_id usata per filtrare il tempo reale.
 - `d`: data `YYYYMMDD` → indice in `p`.
 - `p`: schemi; ogni schema è lista ordinata `[minuti_dalla_mezzanotte_del_giorno_di_servizio, linea]` (può superare 1440).
 - `grid`: fascia [inizio, fine) in minuti.
@@ -89,7 +90,7 @@ Configurazione fermate (id, direzione, fascia griglia) in un oggetto in testa al
 
 ### 4.4 Decoder GTFS-RT (`src/core/pbf.js`)
 
-Decoder protobuf minimale (nessuna dipendenza), legge solo:
+Decoder protobuf minimale (nessuna dipendenza), legge solo le corse delle linee richieste (le altre vengono saltate senza decodificarle, per stare nei limiti di memoria del widget). Il feed scaricato in Scriptable passa da base64 (`Data.toBase64String`) a `Uint8Array` per non creare array JS da ~1 M elementi. Campi letti:
 - `FeedMessage.header.timestamp`, `FeedMessage.entity[]`;
 - `TripUpdate.trip`: `trip_id`, `route_id`, `direction_id`, `schedule_relationship` (CANCELED);
 - `TripUpdate.stop_time_update[]`: `stop_sequence`, `stop_id`, `arrival`/`departure` (`delay`, `time`), `schedule_relationship` (SKIPPED).
@@ -105,10 +106,10 @@ Gestisce varint a 64 bit (time) e int32 negativi (delay). Campi sconosciuti salt
 
 ### 4.6 Script Scriptable (`src/scriptable/` → bundle `dist/Bus490495.js`)
 
-- **Cache**: `data.json` in iCloud (FileManager Scriptable); riscaricato se più vecchio di 24 h o se manca la data odierna; usato offline se il download fallisce. Feed RT mai in cache.
+- **Cache**: `data.json` nella cartella documenti locale di Scriptable (`FileManager.local()`, più affidabile di iCloud per i widget); riscaricato se più vecchio di 24 h o se manca la data odierna; usato offline se il download fallisce. Feed RT mai in cache.
 - **Selezione fermata**: prima delle 12:00 Tiburtina, dopo Calabria; il *Parameter* del widget (`tiburtina`/`calabria`) la forza.
 - **Widget (medio)**: fondo scuro, testo ambra monospace di sistema; nome fermata, "agg. HH:MM", prossimi **3** passaggi con linea colorata (490 blu, 495 rosso mattone), orario, countdown relativo (aggiornato da iOS), `●` live / `prog.`; tap → vista completa. Refresh deciso da iOS (indicativamente 5–15 min).
-- **Vista completa (WebView)**: riuso del design dell'artifact (LED ambra, font Doto): schede Tiburtina | Calabria con selezione automatica, prossimi **5** con countdown, "IN ARRIVO" entro 2 min, live/programmato e ritardo (`+6'`, `−2'`), griglia della fascia (passate in grigio, prossima evidenziata, ritardo accanto alle live), tema chiaro/scuro. Aggiornamento ogni 30 s mentre è aperta: la pagina chiede dati allo script via ponte `evaluateJavaScript`.
+- **Vista completa (WebView)**: riuso del design dell'artifact (LED ambra, font Doto): schede Tiburtina | Calabria con selezione automatica, prossimi **5** con countdown, "IN ARRIVO" entro 2 min, live/programmato e ritardo (`+6'`, `−2'`), griglia della fascia (passate in grigio, prossima evidenziata, ritardo accanto alle live), tema chiaro/scuro. Aggiornamento ogni 30 s mentre è aperta: lo script ricalcola i dati e li passa alla pagina con `evaluateJavaScript`.
 - **Avvisi** (widget e vista): "⚠ tempo reale non disponibile"; "⚠ orari non aggiornati" se la data odierna manca o `generated` > 3 giorni.
 
 ### 4.7 Loader "Bus" (installato a mano una volta)
