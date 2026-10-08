@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bus 490 · 495</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Doto:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9ECEF; --ink:#1F2328; --muted:#5B636D; --rule:#C9CED4;
+  --panel:#24272C; --led:#FFB627; --led-dim:#5A4720;
+  --l490:#1C5D99; --l495:#8C2D19; --past:#9AA1A9; --card:#F7F8F9; --warn:#8C2D19;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#17191C; --ink:#E6E8EB; --muted:#9AA3AD; --rule:#33373D;
+  --panel:#0E0F11; --led-dim:#4A3A16; --l490:#5B9BD5; --l495:#E07A5F; --past:#5D646C; --card:#1F2226;}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,sans-serif;line-height:1.45}
+main{max-width:34rem;margin:0 auto;padding:1rem 1rem 2.5rem}
+header h1{font-size:1.5rem;margin:0 0 .6rem;letter-spacing:-.01em}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin:0 0 .5rem}
+.tabs button{font:inherit;font-weight:700;padding:.55rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);border-radius:4px}
+.tabs button[aria-selected="true"]{background:var(--panel);color:var(--led);border-color:var(--panel)}
+#sub{margin:.1rem 0 1rem;color:var(--muted);font-size:.95rem}
+.warn{background:var(--warn);color:#fff;border-radius:4px;padding:.45rem .7rem;font-size:.9rem;margin:0 0 .8rem}
+.palina{background:var(--panel);border-radius:6px;padding:1rem 1.1rem 1.1rem;box-shadow:inset 0 0 0 3px #3A3E44}
+.palina .top{display:flex;justify-content:space-between;align-items:baseline;color:var(--led);font-family:"Doto",ui-monospace,monospace;font-weight:800;font-size:1.05rem;letter-spacing:.04em;border-bottom:1px dashed var(--led-dim);padding-bottom:.5rem;margin-bottom:.4rem}
+.row{display:grid;grid-template-columns:3.6rem 1fr auto;gap:.6rem;align-items:baseline;font-family:"Doto",ui-monospace,monospace;font-weight:800;color:var(--led);font-size:1.45rem;padding:.25rem 0;text-shadow:0 0 6px rgba(255,182,39,.35)}
+.row .dest{font-size:1rem;font-weight:600;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .tag{font-size:.8rem;font-weight:600;margin-right:.45rem;white-space:nowrap}
+.row .eta{text-align:right}
+.row.soon .eta{animation:blink 1.2s steps(2,start) infinite}
+.row.cancel{color:var(--past);text-shadow:none}
+.row.cancel .dest{text-decoration:line-through}
+@keyframes blink{to{visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.row.soon .eta{animation:none}}
+.empty{color:var(--led);font-family:"Doto",monospace;font-weight:600;padding:.6rem 0}
+.note{font-size:.82rem;color:var(--muted);margin:.6rem .1rem 0}
+h2{font-size:1.05rem;margin:1.6rem 0 .6rem;display:flex;justify-content:space-between;align-items:baseline}
+h2 span{font-weight:400;color:var(--muted);font-size:.85rem}
+.legend{display:flex;gap:1rem;font-size:.85rem;color:var(--muted);margin-bottom:.6rem}
+.badge{display:inline-block;min-width:2.6rem;text-align:center;font-weight:700;font-size:.82rem;color:#fff;border-radius:3px;padding:.05rem .35rem}
+.b490{background:var(--l490)} .b495{background:var(--l495)}
+ol.tt{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(6.4rem,1fr));gap:.4rem}
+ol.tt li{background:var(--card);border-left:4px solid var(--c);padding:.35rem .55rem;border-radius:2px;display:flex;justify-content:space-between;align-items:center;gap:.3rem;font-variant-numeric:tabular-nums;font-size:1.05rem}
+ol.tt li i{font-style:normal;font-size:.72rem;color:var(--muted)}
+ol.tt li small{font-size:.75rem;font-weight:700;color:var(--c)}
+ol.tt li.past{color:var(--past);border-left-color:var(--past)}
+ol.tt li.past small{color:var(--past)}
+ol.tt li.cancel{text-decoration:line-through;color:var(--past)}
+ol.tt li.next{outline:2px solid var(--c);outline-offset:-2px}
+footer{margin-top:2rem;font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Bus 490 · 495</h1>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-k="tiburtina">Tiburtina</button>
+      <button role="tab" data-k="calabria">Calabria</button>
+    </div>
+    <p id="sub"></p>
+  </header>
+  <p class="warn" id="warn" hidden></p>
+  <section class="palina" aria-live="polite" aria-label="Prossimi passaggi">
+    <div class="top"><span>PROSSIMI</span><span id="clock">--:--</span></div>
+    <div id="board"></div>
+  </section>
+  <p class="note">● = tempo reale con ritardo · prog. = orario programmato</p>
+  <h2><span id="gridTitle"></span><span id="dayLabel"></span></h2>
+  <div class="legend"><span><span class="badge b490">490</span> Cornelia ↔ Tiburtina</span><span><span class="badge b495">495</span> Valle Aurelia ↔ Tiburtina</span></div>
+  <ol class="tt" id="tt"></ol>
+  <p class="note" id="ttNote"></p>
+  <footer id="foot"></footer>
+</main>
+<script>
+const TIME_FMT = new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const DAY_FMT = new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', weekday: 'long', day: 'numeric', month: 'numeric' });
+const hhmm = ms => TIME_FMT.format(new Date(ms));
+const DEST = { tiburtina: { 490: 'CORNELIA', 495: 'V.AURELIA' }, calabria: { 490: 'TIBURTINA', 495: 'TIBURTINA' } };
+const SUB = { tiburtina: 'Capolinea Staz.ne Tiburtina, verso Cornelia e Valle Aurelia', calabria: 'Palina 71406, direzione Staz.ne Tiburtina' };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const delay = s => { if (s == null) return ''; const m = Math.round(s / 60); return m > 0 ? `+${m}'` : m < 0 ? `−${-m}'` : "0'"; };
+let M = null, TAB = 'calabria', timer = null;
+
+function init(model, tab) {
+  M = model;
+  TAB = M.stops[tab] ? tab : M.auto;
+  document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { TAB = b.dataset.k; render(); }; });
+  render();
+  if (!timer) timer = setInterval(render, 15000);
+}
+
+function update(model) { M = model; render(); }
+
+function render() {
+  if (!M) return;
+  const now = Date.now();
+  const s = M.stops[TAB];
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.k === TAB)));
+  $('sub').textContent = SUB[TAB] || s.name;
+  $('clock').textContent = hhmm(now);
+  const warns = [];
+  if (!M.rtOk) warns.push('Tempo reale non disponibile: mostro gli orari programmati.');
+  if (!M.dataOk) warns.push('Orari non aggiornati: il dataset potrebbe essere scaduto.');
+  $('warn').hidden = !warns.length;
+  $('warn').textContent = warns.join(' ');
+
+  const up = s.next.filter(e => e.predicted >= now - 60000);
+  $('board').innerHTML = up.length ? up.map(e => {
+    const mins = Math.max(0, Math.round((e.predicted - now) / 60000));
+    const eta = e.canceled ? 'SOPPR.' : mins === 0 ? 'IN ARRIVO' : mins < 60 ? mins + "'" : hhmm(e.predicted);
+    const tag = e.live ? `● ${delay(e.delaySec)}` : 'prog.';
+    const cls = e.canceled ? ' cancel' : mins <= 2 ? ' soon' : '';
+    return `<div class="row${cls}"><span>${e.line}</span><span class="dest">${hhmm(e.predicted)} ${esc((DEST[TAB] || {})[e.line] || '')}</span><span class="eta"><span class="tag">${tag}</span>${eta}</span></div>`;
+  }).join('') : '<div class="empty">NESSUN PASSAGGIO</div>';
+
+  $('gridTitle').textContent = `Dalle ${s.grid[0] / 60} alle ${s.grid[1] / 60}`;
+  $('dayLabel').textContent = DAY_FMT.format(new Date(now));
+  let marked = false;
+  $('tt').innerHTML = s.table.map(e => {
+    const past = e.predicted < now - 30000;
+    let cls = e.canceled ? 'cancel' : past ? 'past' : '';
+    if (!past && !e.canceled && !marked) { cls = 'next'; marked = true; }
+    return `<li class="${cls}" style="--c:var(--l${e.line})">${hhmm(e.sched)}${e.live ? `<i>${delay(e.delaySec)}</i>` : ''}<small>${e.line}</small></li>`;
+  }).join('');
+  $('ttNote').textContent = s.table.length ? `${s.table.length} passaggi in fascia.` : 'Nessun orario per oggi in questa fascia.';
+  $('foot').textContent = `Orari del ${new Date(M.generated).toLocaleDateString('it-IT')} · dati calcolati alle ${hhmm(M.now)}${M.rtOk ? ' · tempo reale attivo' : ''}`;
+}
+</script>
+</body>
+</html>
