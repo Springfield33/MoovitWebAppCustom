@@ -113,3 +113,23 @@ export async function fetchBand(band, nowMs, getJson) {
   if (pages.some(p => !Array.isArray(p))) throw new Error(BAD_RESPONSE);
   return selectTrains(pages.flat(), band, nowMs);
 }
+
+// Variazioni da notificare tra due fotografie della fascia. I treni spariti dal tabellone (già partiti) si ignorano.
+export function diffSnapshots(prev, curr) {
+  const before = new Map(prev.map(t => [t.numero, t]));
+  const out = [];
+  for (const c of curr) {
+    const p = before.get(c.numero);
+    const was = !!p && isAlert(p);
+    const is = isAlert(c);
+    const label = trainLabel(c);
+    if (!was && is) out.push(`${label}: ${trainState(c)}`);
+    else if (was && !is) out.push(p.soppresso ? `${label}: soppressione revocata, ${trainState(c)}` : `${label} rientrato: ${trainState(c)}`);
+    else if (was && is) {
+      if (c.soppresso && !p.soppresso) out.push(`${label}: ${trainState(p)} → SOPPRESSO`);
+      else if (!c.soppresso && p.soppresso) out.push(`${label}: soppressione revocata, ${trainState(c)}`);
+      else if (!c.soppresso && Math.abs(c.ritardo - p.ritardo) >= CHANGE_DELTA_MIN) out.push(`${label}: ${trainState(p)} → ${trainState(c)}`);
+    }
+  }
+  return out;
+}

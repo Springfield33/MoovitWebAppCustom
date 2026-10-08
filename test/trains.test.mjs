@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   VT_BASE, TRAIN_BANDS, vtDate, partenzeUrl, queryTimes, bandForBusStop, bandAt,
-  selectTrains, isAlert, trainState, trainLabel, worstLabel, trainsEntry, fetchBand,
+  selectTrains, isAlert, trainState, trainLabel, worstLabel, trainsEntry, fetchBand, diffSnapshots,
 } from '../src/core/trains.js';
 
 const [MATTINA, POMERIGGIO] = TRAIN_BANDS;
@@ -129,4 +129,26 @@ test('fetchBand: una chiamata per queryTimes, risultati uniti e filtrati', async
   assert.equal(list.length, 3);
   await assert.rejects(fetchBand(TEST_POM, Date.UTC(2026, 9, 8, 8, 0), async () => '<html>'), /Viaggiatreno/);
   assert.deepEqual(await fetchBand(TEST_POM, Date.UTC(2026, 9, 8, 12, 0), async () => { throw new Error('non chiamare'); }), []);
+});
+
+const T = (numero, orario, ritardo, soppresso = false) => ({ numero, categoria: 'REG', destinazione: 'FARA SABINA-MONTELIBRETTI', orario, partenzaMs: 0, ritardo, soppresso });
+
+test('diffSnapshots: ingresso in allerta e nuova soppressione', () => {
+  assert.deepEqual(diffSnapshots([], [T(1, '16:31', 4), T(2, '16:46', 13)]), ["REG 2 (16:46): +13'"]);
+  assert.deepEqual(diffSnapshots([T(1, '16:31', 4)], [T(1, '16:31', 4, true)]), ['REG 1 (16:31): SOPPRESSO']);
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 13)], [T(2, '16:46', 13, true)]), ["REG 2 (16:46): +13' → SOPPRESSO"]);
+});
+
+test('diffSnapshots: miglioramenti', () => {
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 13)], [T(2, '16:46', 4)]), ["REG 2 (16:46) rientrato: +4'"]);
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 0, true)], [T(2, '16:46', 3)]), ["REG 2 (16:46): soppressione revocata, +3'"]);
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 0, true)], [T(2, '16:46', 15)]), ["REG 2 (16:46): soppressione revocata, +15'"]);
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 25)], [T(2, '16:46', 15)]), ["REG 2 (16:46): +25' → +15'"]);
+});
+
+test('diffSnapshots: variazioni sotto i 5 minuti e treni partiti ignorati', () => {
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 13)], [T(2, '16:46', 17)]), []);
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 13)], [T(2, '16:46', 18)]), ["REG 2 (16:46): +13' → +18'"]);
+  assert.deepEqual(diffSnapshots([T(1, '16:31', 4), T(2, '16:46', 3)], [T(1, '16:31', 9)]), []);
+  assert.deepEqual(diffSnapshots([T(2, '16:46', 30)], []), []); // partito: sparito dal tabellone
 });
