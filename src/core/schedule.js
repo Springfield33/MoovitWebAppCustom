@@ -11,7 +11,7 @@ export function romeParts(ms) {
   return { y: +o.year, mo: +o.month, d: +o.day, h: +o.hour % 24, mi: +o.minute, s: +o.second };
 }
 
-function pad2(n) {
+export function pad2(n) {
   return String(n).padStart(2, '0');
 }
 
@@ -30,7 +30,7 @@ export function shiftDay(key, n) {
   return `${t.getUTCFullYear()}${pad2(t.getUTCMonth() + 1)}${pad2(t.getUTCDate())}`;
 }
 
-function romeOffsetMs(ms) {
+export function romeOffsetMs(ms) {
   const p = romeParts(ms);
   return Date.UTC(p.y, p.mo - 1, p.d, p.h, p.mi, p.s) - Math.floor(ms / 1000) * 1000;
 }
