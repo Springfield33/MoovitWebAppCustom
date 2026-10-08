@@ -1,0 +1,134 @@
+[
+ {
+  "numeroTreno": 20503,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08209",
+  "orarioPartenza": 1791469200000,
+  "compOrarioPartenza": "16:20",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20521,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08214",
+  "orarioPartenza": 1791470100000,
+  "compOrarioPartenza": "16:35",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20677,
+  "categoriaDescrizione": "REG",
+  "destinazione": "ORTE",
+  "codOrigine": "S08411",
+  "orarioPartenza": 1791470460000,
+  "compOrarioPartenza": "16:41",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20523,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08213",
+  "orarioPartenza": 1791471000000,
+  "compOrarioPartenza": "16:50",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20679,
+  "categoriaDescrizione": "REG",
+  "destinazione": "POGGIO MIRTETO",
+  "codOrigine": "S08411",
+  "orarioPartenza": 1791471360000,
+  "compOrarioPartenza": "16:56",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20527,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08214",
+  "orarioPartenza": 1791471900000,
+  "compOrarioPartenza": "17:05",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20517,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08209",
+  "orarioPartenza": 1791472800000,
+  "compOrarioPartenza": "17:20",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20683,
+  "categoriaDescrizione": "REG",
+  "destinazione": "ORTE",
+  "codOrigine": "S08411",
+  "orarioPartenza": 1791473160000,
+  "compOrarioPartenza": "17:26",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20531,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08214",
+  "orarioPartenza": 1791473700000,
+  "compOrarioPartenza": "17:35",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20533,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08213",
+  "orarioPartenza": 1791474600000,
+  "compOrarioPartenza": "17:50",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20687,
+  "categoriaDescrizione": "REG",
+  "destinazione": "ORTE",
+  "codOrigine": "S08411",
+  "orarioPartenza": 1791474960000,
+  "compOrarioPartenza": "17:56",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ },
+ {
+  "numeroTreno": 20535,
+  "categoriaDescrizione": "REG",
+  "destinazione": "FIUMICINO AEROPORTO",
+  "codOrigine": "S08214",
+  "orarioPartenza": 1791475500000,
+  "compOrarioPartenza": "18:05",
+  "ritardo": 0,
+  "provvedimento": 0,
+  "nonPartito": true
+ }
+]

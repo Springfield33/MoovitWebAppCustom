@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   VT_BASE, TRAIN_BANDS, vtDate, partenzeUrl, queryTimes, bandForBusStop, bandAt,
+  selectTrains, isAlert, trainState, trainLabel, worstLabel, trainsEntry, fetchBand,
 } from '../src/core/trains.js';
 
 const [MATTINA, POMERIGGIO] = TRAIN_BANDS;
@@ -55,4 +57,76 @@ test('bandAt: controllo da 30\' prima, chiusura per 60\' dopo la fascia', () => 
   assert.equal(at(rome(19, 30)), null);
   assert.equal(at(Date.UTC(2026, 11, 7, 5, 0)), 'mattina:check'); // 06:00 ora solare
   assert.equal(at(Date.UTC(2026, 11, 7, 4, 59)), null);
+});
+
+const TIB = JSON.parse(readFileSync(new URL('./fixtures/vt-tiburtina.json', import.meta.url)));
+const FARA = JSON.parse(readFileSync(new URL('./fixtures/vt-fara.json', import.meta.url)));
+const FIX_NOW = Date.UTC(2026, 9, 8, 8, 28); // 10:28 Roma, quando sono state scaricate
+const TEST_POM = { ...POMERIGGIO, from: 615, to: 660 }; // 10:15–11:00 verso Fara
+const TEST_MAT = { ...MATTINA, from: 990, to: 1080 };   // 16:30–18:00 verso Roma
+
+test('selectTrains: fascia e destinazione, ordinati, normalizzati', () => {
+  const list = selectTrains(TIB, TEST_POM, FIX_NOW);
+  assert.deepEqual(list.map(t => `${t.orario} ${t.numero} ${t.ritardo}`), ['10:16 20613 8', '10:31 20615 4', '10:46 20621 13']);
+  assert.deepEqual(list[2], {
+    numero: 20621, categoria: 'REG', destinazione: 'FARA SABINA-MONTELIBRETTI',
+    orario: '10:46', partenzaMs: Date.UTC(2026, 9, 8, 8, 46), ritardo: 13, soppresso: false,
+  });
+});
+
+test('selectTrains: da Fara tiene solo i treni verso Roma', () => {
+  const list = selectTrains(FARA, TEST_MAT, FIX_NOW);
+  assert.deepEqual(list.map(t => t.numero), [20521, 20523, 20527, 20517, 20531, 20533]);
+});
+
+test('selectTrains: dedup tra chiamate sovrapposte, altro giorno escluso', () => {
+  assert.equal(selectTrains([...TIB, ...TIB], TEST_POM, FIX_NOW).length, 3);
+  assert.equal(selectTrains(TIB, TEST_POM, FIX_NOW + 86400000).length, 0);
+});
+
+test('selectTrains: input non-array → errore', () => {
+  assert.throws(() => selectTrains({ error: 'x' }, TEST_POM, FIX_NOW), /Viaggiatreno/);
+  assert.throws(() => selectTrains(null, TEST_POM, FIX_NOW), /Viaggiatreno/);
+});
+
+test('soppressione, anticipo e provvedimento assente', () => {
+  const base = TIB.find(t => t.numeroTreno === 20615);
+  const [sopp] = selectTrains([{ ...base, provvedimento: 1 }], TEST_POM, FIX_NOW);
+  const [early] = selectTrains([{ ...base, ritardo: -3 }], TEST_POM, FIX_NOW);
+  const [noProv] = selectTrains([{ ...base, provvedimento: undefined }], TEST_POM, FIX_NOW);
+  assert.equal(sopp.soppresso, true);
+  assert.equal(noProv.soppresso, false);
+  assert.equal(trainState(sopp), 'SOPPRESSO');
+  assert.equal(trainState(early), 'in orario');
+  assert.equal(isAlert(early), false);
+  assert.equal(isAlert(sopp), true);
+});
+
+test('isAlert, trainState, trainLabel, worstLabel', () => {
+  const [a, b, c] = selectTrains(TIB, TEST_POM, FIX_NOW); // +8, +4, +13
+  assert.equal(isAlert(a), false);
+  assert.equal(isAlert({ ...a, ritardo: 10 }), true);
+  assert.equal(isAlert(c), true);
+  assert.equal(trainState(b), "+4'");
+  assert.equal(trainLabel(c), 'REG 20621 (10:46)');
+  assert.equal(worstLabel([a, b]), null);
+  assert.equal(worstLabel([a, b, c]), "+13'");
+  assert.equal(worstLabel([c, { ...b, soppresso: true }]), 'SOPPR');
+  assert.equal(worstLabel([]), null);
+});
+
+test('trainsEntry: aggiunge stato e allerta per la vista', () => {
+  const e = trainsEntry(selectTrains(TIB, TEST_POM, FIX_NOW));
+  assert.equal(e.alert, "+13'");
+  assert.deepEqual(e.list.map(t => [t.state, t.late]), [["+8'", false], ["+4'", false], ["+13'", true]]);
+});
+
+test('fetchBand: una chiamata per queryTimes, risultati uniti e filtrati', async () => {
+  const urls = [];
+  const list = await fetchBand(TEST_POM, Date.UTC(2026, 9, 8, 8, 0), async url => { urls.push(url); return TIB; });
+  assert.equal(urls.length, 1); // 10:15–11:00 → una sola chiamata
+  assert.match(urls[0], /\/partenze\/S08217\/Thu%20Oct%2008%202026%2010:15:00%20GMT%2B0200$/);
+  assert.equal(list.length, 3);
+  await assert.rejects(fetchBand(TEST_POM, Date.UTC(2026, 9, 8, 8, 0), async () => '<html>'), /Viaggiatreno/);
+  assert.deepEqual(await fetchBand(TEST_POM, Date.UTC(2026, 9, 8, 12, 0), async () => { throw new Error('non chiamare'); }), []);
 });

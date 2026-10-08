@@ -62,3 +62,54 @@ export function bandAt(nowMs) {
   }
   return null;
 }
+
+const BAD_RESPONSE = 'Risposta Viaggiatreno inattesa';
+
+export function selectTrains(partenze, band, nowMs) {
+  if (!Array.isArray(partenze)) throw new Error(BAD_RESPONSE);
+  const today = romeDayKey(nowMs);
+  const seen = new Set();
+  const out = [];
+  for (const t of partenze) {
+    const ms = Number(t && t.orarioPartenza);
+    if (!ms || seen.has(t.numeroTreno) || romeDayKey(ms) !== today) continue;
+    const m = romeMinutes(ms);
+    const dest = String(t.destinazione || '').trim().toUpperCase();
+    if (m < band.from || m > band.to || !band.destinations.includes(dest)) continue;
+    seen.add(t.numeroTreno);
+    out.push({
+      numero: t.numeroTreno, categoria: String(t.categoriaDescrizione || '').trim(), destinazione: dest,
+      orario: hhmm(ms), partenzaMs: ms, ritardo: Number(t.ritardo) || 0, soppresso: Number(t.provvedimento || 0) !== 0,
+    });
+  }
+  return out.sort((a, b) => a.partenzaMs - b.partenzaMs || a.numero - b.numero);
+}
+
+export function isAlert(t) {
+  return t.soppresso || t.ritardo >= ALERT_DELAY_MIN;
+}
+
+export function trainState(t) {
+  return t.soppresso ? 'SOPPRESSO' : t.ritardo > 0 ? `+${t.ritardo}'` : 'in orario';
+}
+
+export function trainLabel(t) {
+  return `${t.categoria} ${t.numero} (${t.orario})`;
+}
+
+export function worstLabel(trains) {
+  const bad = trains.filter(isAlert);
+  if (!bad.length) return null;
+  if (bad.some(t => t.soppresso)) return 'SOPPR';
+  return `+${Math.max(...bad.map(t => t.ritardo))}'`;
+}
+
+export function trainsEntry(trains) {
+  return { list: trains.map(t => ({ ...t, state: trainState(t), late: isAlert(t) })), alert: worstLabel(trains) };
+}
+
+export async function fetchBand(band, nowMs, getJson) {
+  const pages = await Promise.all(queryTimes(band, nowMs).map(t => getJson(partenzeUrl(band.station, t))));
+  if (pages.some(p => !Array.isArray(p))) throw new Error(BAD_RESPONSE);
+  return selectTrains(pages.flat(), band, nowMs);
+}
