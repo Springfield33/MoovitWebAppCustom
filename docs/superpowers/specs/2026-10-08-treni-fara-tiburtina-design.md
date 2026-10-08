@@ -93,7 +93,7 @@ iPhone – Scriptable                       Repo privato treni-fara
   header `User-Agent` Safari iOS, timeout ~5 s, e restituisce `selectTrains(...)` oppure `null` su
   qualunque errore. Nessuna cache.
 - `main.js`: avvia `fetchTrains(bandForBusStop(key))` **in parallelo** a `loadFeed()`; il risultato entra
-  nel modello come `model.trains = { band, list } | null` . Se la fascia abbinata è già finita (`queryTimes` vuoto) non parte nessuna chiamata e la lista è vuota.
+  nel modello come `model.trains = { band, list } | null`. Se la fascia abbinata è già finita (`queryTimes` vuoto) non parte nessuna chiamata e la lista è vuota.
 - `widget.js`: nell'intestazione, prima di `agg. HH:MM`, testo `🚆+15'` / `🚆SOPPR` in colore `warn`
   se `worstLabel` non è `null`. Nessun indicatore se i treni non sono disponibili.
 - `view.html`: sotto la griglia bus, sezione "Treni {label}" con tutti i treni della fascia ancora da
