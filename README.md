@@ -16,13 +16,13 @@ Dati: open data di Roma Servizi per la Mobilità (GTFS statico + GTFS-Realtime).
 ## Installazione
 
 ### GitHub (una volta)
-1. Crea il repository pubblico `bus-roma` e fai il push di questo progetto.
+1. Crea il repository pubblico (qui: `Springfield33/MoovitWebAppCustom`) e fai il push di questo progetto.
 2. *Settings → Pages → Build and deployment → Source*: **GitHub Actions**.
-3. *Actions → update-data → Run workflow*. Al termine, `https://<utente>.github.io/bus-roma/` mostra i link.
+3. *Actions → update-data → Run workflow*. Al termine, `https://springfield33.github.io/MoovitWebAppCustom/` mostra i link.
 
 ### iPhone (una volta)
 1. Installa **Scriptable** dall'App Store.
-2. In Safari apri `https://<utente>.github.io/bus-roma/Bus.js`, seleziona tutto e copia.
+2. In Safari apri `https://springfield33.github.io/MoovitWebAppCustom/Bus.js`, seleziona tutto e copia.
 3. In Scriptable: **+**, incolla, rinomina lo script in **Bus**, esegui (▶) per provarlo.
 4. Home: tieni premuto → **+** → Scriptable → formato **medio** → tocca il widget → *Script*: **Bus**.
    *Parameter* (facoltativo): `tiburtina` o `calabria` per fissare la fermata.
