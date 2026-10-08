@@ -18,6 +18,7 @@ test('il bundle si carica ed espone main, buildModel, decodeFeed', () => {
   const code = bundle({ pagesBase: BASE });
   assert.match(code, /const PAGES_BASE = "https:\/\/utente\.github\.io\/bus-roma\/";/);
   assert.match(code, /function init\(model, tab\)/); // view.html incorporata
+  assert.match(code, /id=\\"trSec\\"/); // sezione treni nella vista incorporata
   assert.doesNotMatch(code, /^import\s/m);
   assert.doesNotMatch(code, /^export\s/m);
   const api = load(code);

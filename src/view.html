@@ -51,6 +51,13 @@ ol.tt li.past{color:var(--past);border-left-color:var(--past)}
 ol.tt li.past small{color:var(--past)}
 ol.tt li.cancel{text-decoration:line-through;color:var(--past)}
 ol.tt li.next{outline:2px solid var(--c);outline-offset:-2px}
+ul.tr{list-style:none;margin:0;padding:0}
+ul.tr li{display:grid;grid-template-columns:3.2rem 1fr auto;gap:.5rem;align-items:baseline;background:var(--card);border-left:4px solid var(--rule);border-radius:2px;padding:.4rem .6rem;margin-bottom:.3rem;font-variant-numeric:tabular-nums}
+ul.tr li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:.9rem}
+ul.tr li em{font-style:normal;font-weight:700}
+ul.tr li.late{border-left-color:var(--warn)}
+ul.tr li.late em{color:var(--warn)}
+ul.tr li.na{display:block;color:var(--muted)}
 footer{margin-top:2rem;font-size:.8rem;color:var(--muted)}
 </style>
 </head>
@@ -74,6 +81,10 @@ footer{margin-top:2rem;font-size:.8rem;color:var(--muted)}
   <div class="legend"><span><span class="badge b490">490</span> Cornelia ↔ Tiburtina</span><span><span class="badge b495">495</span> Valle Aurelia ↔ Tiburtina</span></div>
   <ol class="tt" id="tt"></ol>
   <p class="note" id="ttNote"></p>
+  <section id="trSec" hidden>
+    <h2><span id="trTitle"></span><span id="trNote"></span></h2>
+    <ul class="tr" id="trList"></ul>
+  </section>
   <footer id="foot"></footer>
 </main>
 <script>
@@ -82,6 +93,7 @@ const DAY_FMT = new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', week
 const hhmm = ms => TIME_FMT.format(new Date(ms));
 const DEST = { tiburtina: { 490: 'CORNELIA', 495: 'V.AURELIA' }, calabria: { 490: 'TIBURTINA', 495: 'TIBURTINA' } };
 const SUB = { tiburtina: 'Capolinea Staz.ne Tiburtina, verso Cornelia e Valle Aurelia', calabria: 'Palina 71406, direzione Staz.ne Tiburtina' };
+const TRAIN_TITLE = { tiburtina: 'Treni Fara Sabina → Tiburtina', calabria: 'Treni Tiburtina → Fara Sabina' };
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const delay = s => { if (s == null) return ''; const m = Math.round(s / 60); return m > 0 ? `+${m}'` : m < 0 ? `−${-m}'` : "0'"; };
@@ -129,7 +141,14 @@ function render() {
     return `<li class="${cls}" style="--c:var(--l${e.line})">${hhmm(e.sched)}${e.live ? `<i>${delay(e.delaySec)}</i>` : ''}<small>${e.line}</small></li>`;
   }).join('');
   $('ttNote').textContent = s.table.length ? `${s.table.length} passaggi in fascia.` : 'Nessun orario per oggi in questa fascia.';
-  $('foot').textContent = `Orari del ${new Date(M.generated).toLocaleDateString('it-IT')} · dati calcolati alle ${hhmm(M.now)}${M.rtOk ? ' · tempo reale attivo' : ''}`;
+  const tr = (M.trains || {})[TAB];
+  $('trSec').hidden = tr === undefined;
+  $('trTitle').textContent = TRAIN_TITLE[TAB] || 'Treni';
+  $('trNote').textContent = tr && tr.alert ? 'ritardi in fascia' : '';
+  $('trList').innerHTML = !tr ? '<li class="na">Treni non disponibili.</li>'
+    : !tr.list.length ? '<li class="na">Nessun treno in fascia.</li>'
+    : tr.list.map(t => `<li class="${t.late ? 'late' : ''}"><b>${t.orario}</b><span>${esc(t.categoria)} ${t.numero} · ${esc(t.destinazione)}</span><em>${esc(t.state)}</em></li>`).join('');
+  $('foot').textContent =`Orari del ${new Date(M.generated).toLocaleDateString('it-IT')} · dati calcolati alle ${hhmm(M.now)}${M.rtOk ? ' · tempo reale attivo' : ''}`;
 }
 </script>
 </body>
