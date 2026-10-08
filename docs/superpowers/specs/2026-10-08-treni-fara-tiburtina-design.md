@@ -99,7 +99,7 @@ iPhone – Scriptable                       Repo privato treni-fara
 - `view.html`: sotto la griglia bus, sezione "Treni {label}" con tutti i treni della fascia ancora da
   partire: `HH:MM  REG 20455  in orario | +3' | +15' (warn) | SOPPRESSO (warn)`. Se `model.trains`
   è `null`: riga "treni non disponibili". Si aggiorna col refresh a 30 s già esistente.
-- `config.js`: `VT_BASE`, `VT_UA`.
+- `config.js`: `VT_TIMEOUT_S`. `VT_BASE` e `VT_UA` stanno in `src/core/trains.js` perché servono anche a `notify.mjs`.
 
 ### 3.3 Repo privato `treni-fara`
 
@@ -125,8 +125,7 @@ iPhone – Scriptable                       Repo privato treni-fara
      - issue aperta, primo run dopo la fine della fascia (mattina ≥ 09:00, pomeriggio ≥ 18:30, entro
        l'ora successiva) → commento di riepilogo e **chiusura**;
      - altrimenti nessuna azione.
-- `.github/workflows/keepalive.yml`: mensile, aggiorna e committa un file `keepalive` per evitare la
-  disattivazione dei workflow schedulati dopo 60 giorni di inattività.
+- Nessun workflow di keepalive: la disattivazione dei cron dopo 60 giorni senza attività riguarda solo i repo pubblici.
 - Consumo stimato: ~54 run/giorno lun–ven, ~1200 minuti/mese su 2000 gratuiti per repo privati.
 
 ## 4. Gestione errori
