@@ -4,6 +4,10 @@ Widget e vista Scriptable (iPhone) con i passaggi delle linee ATAC **490** e **4
 **Staz.ne Tiburtina** (partenze, griglia 7–9) e **Calabria** (verso Tiburtina, griglia 16–18),
 in tempo reale quando disponibile e con gli orari programmati come riserva.
 
+Se i regionali **Fara Sabina ↔ Tiburtina** della fascia abbinata (mattina 6:30–9:00 da Fara, pomeriggio
+16:30–18:30 da Tiburtina) hanno un ritardo ≥ 10' o una soppressione, il widget mostra `🚆+N'` / `🚆SOPPR`
+e la vista elenca i treni della fascia. Dati: Viaggiatreno, chiamato direttamente dall'iPhone.
+
 Dati: open data di Roma Servizi per la Mobilità (GTFS statico + GTFS-Realtime).
 
 ## Come funziona
