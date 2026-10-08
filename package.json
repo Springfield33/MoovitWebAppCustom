@@ -1,0 +1,14 @@
+{
+  "name": "bus-roma",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build-data": "node scripts/build-data.mjs",
+    "bundle": "node scripts/bundle.mjs",
+    "preview": "node scripts/preview-view.mjs"
+  },
+  "devDependencies": {
+    "gtfs-realtime-bindings": "^1.1.1"
+  }
+}
