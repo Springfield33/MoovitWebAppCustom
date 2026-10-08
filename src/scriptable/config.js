@@ -3,3 +3,4 @@ const RT_URL = 'https://romamobilita.it/sites/default/files/rome_rtgtfs_trip_upd
 const DATA_URL = PAGES_BASE + 'data.json';
 const FEED_ROUTES = ['490', '495'];
 const CACHE_DIR_NAME = 'bus-roma';
+const VT_TIMEOUT_S = 5;

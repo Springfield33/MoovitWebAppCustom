@@ -25,6 +25,8 @@ function buildWidget(model, key) {
   head.centerAlignContent();
   wText(head, STOP_LABEL[key] || key.toUpperCase(), 13, W_COLORS.led);
   head.addSpacer();
+  const tr = (model.trains || {})[key];
+  if (tr && tr.alert) wText(head, '🚆' + tr.alert + ' ', 11, W_COLORS.warn);
   const ok = model.rtOk && model.dataOk;
   const flags = (model.rtOk ? '' : '⚠RT ') + (model.dataOk ? '' : '⚠ORARI ');
   wText(head, flags + 'agg. ' + hhmm(model.now), 11, ok ? W_COLORS.dim : W_COLORS.warn, false);

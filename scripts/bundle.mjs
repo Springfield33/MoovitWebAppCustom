@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export const ORDER = [
-  'src/core/schedule.js', 'src/core/b64.js', 'src/core/pbf.js', 'src/core/merge.js', 'src/core/model.js',
-  'src/scriptable/config.js', 'src/scriptable/cache.js', 'src/scriptable/widget.js',
+  'src/core/schedule.js', 'src/core/b64.js', 'src/core/pbf.js', 'src/core/merge.js', 'src/core/trains.js', 'src/core/model.js',
+  'src/scriptable/config.js', 'src/scriptable/cache.js', 'src/scriptable/trains.js', 'src/scriptable/widget.js',
   'src/scriptable/view.js', 'src/scriptable/main.js',
 ];
 
@@ -28,7 +28,7 @@ export function bundle({ root = '.', pagesBase, files = ORDER }) {
     }
     parts.push(`// ---- ${f}`, body);
   }
-  parts.push('module.exports = { main, buildModel, decodeFeed };', '');
+  parts.push('module.exports = { main, buildModel, decodeFeed, selectTrains, worstLabel };', '');
   return parts.join('\n');
 }
 

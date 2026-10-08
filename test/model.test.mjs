@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildModel } from '../src/core/model.js';
+import { buildModel, autoStop } from '../src/core/model.js';
 import { hhmm } from '../src/core/schedule.js';
 
 // Schema feriale Calabria (dall'artifact), solo attorno alla fascia 16–18.
@@ -56,4 +56,15 @@ test('dataOk falso se manca la data odierna o i dati hanno più di 3 giorni', ()
 test('auto: mattina Tiburtina, pomeriggio Calabria', () => {
   assert.equal(buildModel(data(), null, Date.UTC(2026, 9, 6, 6, 0)).auto, 'tiburtina');
   assert.equal(buildModel(data(), null, Date.UTC(2026, 9, 6, 10, 0)).auto, 'calabria');
+});
+
+test('trains: passati nel modello così come sono, default vuoto', () => {
+  const tr = { calabria: { list: [], alert: null }, tiburtina: null };
+  assert.deepEqual(buildModel(data(), null, NOW).trains, {});
+  assert.equal(buildModel(data(), null, NOW, tr).trains, tr);
+});
+
+test('autoStop coincide con model.auto', () => {
+  assert.equal(autoStop(Date.UTC(2026, 9, 6, 6, 0)), 'tiburtina');
+  assert.equal(autoStop(Date.UTC(2026, 9, 6, 10, 0)), 'calabria');
 });

@@ -6,7 +6,11 @@ const MODEL_LINES = [490, 495];
 const FEED_MAX_AGE_MS = 5 * 60000;
 const DATA_MAX_AGE_MS = 3 * 86400000;
 
-export function buildModel(data, feed, nowMs) {
+export function autoStop(nowMs) {
+  return romeParts(nowMs).h < 12 ? 'tiburtina' : 'calabria';
+}
+
+export function buildModel(data, feed, nowMs, trains = {}) {
   const rtOk = !!feed && feed.timestamp !== null && nowMs - feed.timestamp * 1000 <= FEED_MAX_AGE_MS;
   const today = romeDayKey(nowMs);
   let dataOk = nowMs - Date.parse(data.generated) <= DATA_MAX_AGE_MS;
@@ -17,5 +21,5 @@ export function buildModel(data, feed, nowMs) {
     const events = annotate(scheduledEvents(s, nowMs), rt);
     stops[key] = { key, name: s.name, grid: s.grid, next: nextDepartures(events, nowMs, 5), table: gridDepartures(events, today, s.grid) };
   }
-  return { now: nowMs, today, rtOk, dataOk, generated: data.generated, auto: romeParts(nowMs).h < 12 ? 'tiburtina' : 'calabria', stops };
+  return { now: nowMs, today, rtOk, dataOk, generated: data.generated, auto: autoStop(nowMs), stops, trains };
 }

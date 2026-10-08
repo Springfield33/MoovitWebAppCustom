@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
@@ -57,4 +57,12 @@ test('loader punta a Bus490495.js su Pages', () => {
   assert.match(code, /const BASE = "https:\/\/utente\.github\.io\/bus-roma\/";/);
   assert.match(code, /BASE \+ 'Bus490495\.js'/);
   assert.match(code, /importModule\(lib\)\.main\(\)/);
+});
+
+test('il bundle include la logica treni', () => {
+  const api = load(bundle({ pagesBase: BASE }));
+  const tib = JSON.parse(readFileSync(new URL('./fixtures/vt-tiburtina.json', import.meta.url)));
+  const band = { key: 't', station: 'S08217', from: 615, to: 660, destinations: ['FARA SABINA-MONTELIBRETTI'] };
+  const list = api.selectTrains(tib, band, Date.UTC(2026, 9, 8, 8, 28));
+  assert.equal(api.worstLabel(list), "+13'");
 });
