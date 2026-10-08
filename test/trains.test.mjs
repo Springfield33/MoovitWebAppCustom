@@ -152,3 +152,9 @@ test('diffSnapshots: variazioni sotto i 5 minuti e treni partiti ignorati', () =
   assert.deepEqual(diffSnapshots([T(1, '16:31', 4), T(2, '16:46', 3)], [T(1, '16:31', 9)]), []);
   assert.deepEqual(diffSnapshots([T(2, '16:46', 30)], []), []); // partito: sparito dal tabellone
 });
+
+test('selectTrains: numero treno non numerico scartato (finisce nella WebView)', () => {
+  const base = TIB.find(t => t.numeroTreno === 20615);
+  assert.deepEqual(selectTrains([{ ...base, numeroTreno: '<img src=x onerror=alert(1)>' }], TEST_POM, FIX_NOW), []);
+  assert.equal(selectTrains([{ ...base, numeroTreno: '20615' }], TEST_POM, FIX_NOW)[0].numero, 20615);
+});

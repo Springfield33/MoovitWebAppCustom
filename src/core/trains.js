@@ -72,13 +72,14 @@ export function selectTrains(partenze, band, nowMs) {
   const out = [];
   for (const t of partenze) {
     const ms = Number(t && t.orarioPartenza);
-    if (!ms || seen.has(t.numeroTreno) || romeDayKey(ms) !== today) continue;
+    const numero = Number(t && t.numeroTreno);
+    if (!ms || !Number.isInteger(numero) || seen.has(numero) || romeDayKey(ms) !== today) continue;
     const m = romeMinutes(ms);
     const dest = String(t.destinazione || '').trim().toUpperCase();
     if (m < band.from || m > band.to || !band.destinations.includes(dest)) continue;
-    seen.add(t.numeroTreno);
+    seen.add(numero);
     out.push({
-      numero: t.numeroTreno, categoria: String(t.categoriaDescrizione || '').trim(), destinazione: dest,
+      numero, categoria: String(t.categoriaDescrizione || '').trim(), destinazione: dest,
       orario: hhmm(ms), partenzaMs: ms, ritardo: Number(t.ritardo) || 0, soppresso: Number(t.provvedimento || 0) !== 0,
     });
   }
