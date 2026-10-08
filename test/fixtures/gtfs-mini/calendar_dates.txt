@@ -1,0 +1,5 @@
+service_id,date,exception_type
+FER,20261006,1
+FER,20261007,1
+FES,20261011,1
+FER,20261011,2
