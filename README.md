@@ -31,7 +31,7 @@ Dati: open data di Roma Servizi per la Mobilità (GTFS statico + GTFS-Realtime).
 4. Home: tieni premuto → **+** → Scriptable → formato **medio** → tocca il widget → *Script*: **Bus**.
    *Parameter* (facoltativo): `tiburtina` o `calabria` per fissare la fermata.
 
-Per forzare l'aggiornamento dello script: aprire `scriptable:///run/Bus?update=1`.
+Per forzare l'aggiornamento dello script: aprire `scriptable:///run/Bus?update=1` (al posto di `Bus` il nome dato allo script in Scriptable).
 
 ## Sviluppo
 
